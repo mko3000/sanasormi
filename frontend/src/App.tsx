@@ -67,7 +67,7 @@ export function App() {
       padding: '20px 0',
       display: 'flex',
       flexDirection: 'column',
-      gap: '14px',
+      gap: '10px',
     }}>
       {/* Title */}
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -153,7 +153,7 @@ export function App() {
       {!state.gameOver && (
         <div style={{
           width: '100%',
-          minHeight: '44px',
+          minHeight: state.currentInput ? '44px' : '2px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
