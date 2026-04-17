@@ -65,14 +65,6 @@ export function useGame() {
     })
   }, [])
 
-  const setInput = useCallback((value: string) => {
-    setState((s) => {
-      if (!s) return s
-      // When typing manually, clear grid selection
-      return { ...s, currentInput: value.toLowerCase(), selectedIndices: [] }
-    })
-  }, [])
-
   const clearInput = useCallback(() => {
     setState((s) => s ? { ...s, currentInput: '', selectedIndices: [] } : s)
   }, [])
@@ -164,5 +156,5 @@ export function useGame() {
     })
   }, [state])
 
-  return { state, feedback, loading, tapLetter, setInput, submitWord, clearInput, deleteLetter, mixLetters, giveUp, submitLeaderboard }
+  return { state, feedback, loading, tapLetter, submitWord, clearInput, deleteLetter, mixLetters, giveUp, submitLeaderboard }
 }

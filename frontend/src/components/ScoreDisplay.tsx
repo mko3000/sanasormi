@@ -12,20 +12,31 @@ function formatTime(seconds: number): string {
   return `${m}:${s}`
 }
 
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        {label}
+      </div>
+      <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#111' }}>
+        {value}
+      </div>
+    </div>
+  )
+}
+
 export function ScoreDisplay({ found, total, score, maxScore, timeElapsed }: Props) {
   return (
     <div style={{
       fontFamily: "'Courier New', monospace",
-      fontSize: '14px',
-      color: '#444',
       display: 'flex',
       justifyContent: 'space-between',
       width: '240px',
       margin: '0 auto',
     }}>
-      <span>{found}/{total} sanaa</span>
-      <span>Pisteet: {score}/{maxScore}</span>
-      <span>{formatTime(timeElapsed)}</span>
+      <Stat label="Sanat" value={`${found}/${total}`} />
+      <Stat label="Pisteet" value={`${score}/${maxScore}`} />
+      <Stat label="Aika" value={formatTime(timeElapsed)} />
     </div>
   )
 }

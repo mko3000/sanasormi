@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useGame } from './hooks/useGame'
 import { Grid } from './components/Grid'
-import { WordInput } from './components/WordInput'
 import { FeedbackMessage } from './components/ErrorMessage'
 import { ScoreDisplay } from './components/ScoreDisplay'
 import { FoundWords } from './components/FoundWords'
@@ -23,7 +22,7 @@ const btnGray: React.CSSProperties = { ...btnBase, background: '#eee', color: '#
 const btnBlack: React.CSSProperties = { ...btnBase, background: '#222', color: '#fff' }
 
 export function App() {
-  const { state, feedback, loading, tapLetter, setInput, submitWord, deleteLetter, mixLetters, giveUp, submitLeaderboard } = useGame()
+  const { state, feedback, loading, tapLetter, submitWord, deleteLetter, mixLetters, giveUp, submitLeaderboard } = useGame()
   const [confirmGiveUp, setConfirmGiveUp] = useState(false)
   const [showLeaderboardModal, setShowLeaderboardModal] = useState(false)
   const [username, setUsername] = useState('')
@@ -98,13 +97,24 @@ export function App() {
         timeElapsed={state.timeElapsed}
       />
 
-      {/* Input */}
+      {/* Current word display */}
       {!state.gameOver && (
-        <WordInput
-          value={state.currentInput}
-          onChange={setInput}
-          onSubmit={submitWord}
-        />
+        <div style={{
+          width: '100%',
+          minHeight: '44px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: "'Courier New', monospace",
+          fontSize: '24px',
+          fontWeight: 'bold',
+          letterSpacing: '4px',
+          textTransform: 'uppercase',
+          color: '#111',
+          borderBottom: '2px solid #ddd',
+        }}>
+          {state.currentInput || <span style={{ color: '#ccc', fontSize: '14px', letterSpacing: '1px' }}>valitse kirjaimia</span>}
+        </div>
       )}
 
       {/* Grid */}
