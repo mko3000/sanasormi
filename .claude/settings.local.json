@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod +x:*)",
+      "Bash(npm run:*)",
+      "Bash(grep:*)",
+      "Bash(convert -background none -size 192x192 /home/mspaajan/Code/sanasormi/frontend/public/favicon.svg /home/mspaajan/Code/sanasormi/frontend/public/apple-touch-icon.png)",
+      "Bash(convert -background none -size 192x192 /home/mspaajan/Code/sanasormi/frontend/public/favicon.svg /home/mspaajan/Code/sanasormi/frontend/public/icon-192.png)",
+      "Bash(convert -background none -size 512x512 /home/mspaajan/Code/sanasormi/frontend/public/favicon.svg /home/mspaajan/Code/sanasormi/frontend/public/icon-512.png)",
+      "Bash(python3 -)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ]
+  }
+}

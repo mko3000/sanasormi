@@ -1,0 +1,11 @@
+backend/wordlist/kotus.txt
+data/
+backend/data/
+__pycache__/
+.claude/
+*.pyc
+*.pyo
+.venv/
+node_modules/
+dist/
+frontend/dist/

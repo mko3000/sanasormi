@@ -1,0 +1,30 @@
+# Custom word additions for Sanajahti
+# Add one word per line (lowercase, Finnish letters only)
+hali
+sormettaa
+vittu
+perkele
+saatana
+helvetti
+paska
+jumalauta
+hitto
+kyrpä
+mulkku
+huora
+kusipää
+perse
+pylly
+äpärä
+lutka
+runkkari
+runkku
+pillu
+pimppi
+läski
+nussia
+huorata
+ämmä
+paskainen
+haistaa
+idiootti
