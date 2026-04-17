@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useGame } from './hooks/useGame'
 import { Grid } from './components/Grid'
 import { FeedbackMessage } from './components/ErrorMessage'
@@ -28,6 +28,19 @@ export function App() {
   const [username, setUsername] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [showRules, setShowRules] = useState(false)
+  const rulesRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!showRules) return
+    const handler = (e: MouseEvent) => {
+      if (rulesRef.current && !rulesRef.current.contains(e.target as Node)) {
+        setShowRules(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showRules])
 
   if (loading || !state) {
     return <div style={{ textAlign: 'center', marginTop: '40px', fontFamily: 'monospace' }}>Ladataan...</div>
@@ -57,16 +70,55 @@ export function App() {
       gap: '14px',
     }}>
       {/* Title */}
-      <h1 style={{
-        textAlign: 'center',
-        fontFamily: "'Courier New', monospace",
-        fontSize: '22px',
-        fontWeight: 'bold',
-        margin: 0,
-        letterSpacing: '2px',
-      }}>
-        SANASORMI
-      </h1>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <h1 style={{
+          fontFamily: "'Courier New', monospace",
+          fontSize: '22px',
+          fontWeight: 'bold',
+          margin: 0,
+          letterSpacing: '2px',
+        }}>
+          SANASORMI
+        </h1>
+        <button
+          onClick={() => setShowRules(!showRules)}
+          style={{
+            position: 'absolute', right: 0,
+            width: '22px', height: '22px',
+            borderRadius: '50%',
+            background: '#eee', color: '#666',
+            border: 'none', cursor: 'pointer',
+            fontFamily: "'Courier New', monospace",
+            fontSize: '13px', fontWeight: 'bold',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 0,
+          }}
+        >
+          ?
+        </button>
+        {showRules && (
+          <div ref={rulesRef} style={{
+            position: 'absolute', top: '30px', right: 0, zIndex: 20,
+            background: '#fff', border: '1px solid #ddd', borderRadius: '8px',
+            padding: '14px', width: '220px',
+            fontFamily: "'Courier New', monospace", fontSize: '12px',
+            lineHeight: '1.6', color: '#333',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          }}>
+            <strong>Säännöt</strong>
+            <ul style={{ margin: '8px 0 0', paddingLeft: '16px' }}>
+              <li>Muodosta sanoja ruudukon kirjaimista</li>
+              <li>Jokainen sana pitää sisältää <strong>keskimmäisen kirjaimen</strong></li>
+              <li>Kutakin kirjainta voi käyttää vain kerran per sana</li>
+              <li>Vähintään 3 kirjainta</li>
+              <li>Vain perusmuodot hyväksytään</li>
+            </ul>
+            <div style={{ marginTop: '8px', borderTop: '1px solid #eee', paddingTop: '8px' }}>
+              3p=1 · 4p=2 · 5p=4 · 6p=6 · 7p=9 · 8p=12 · 9p=18
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Lopeta peli */}
       {!state.gameOver && (
@@ -113,7 +165,7 @@ export function App() {
           color: '#111',
           borderBottom: '2px solid #ddd',
         }}>
-          {state.currentInput || <span style={{ color: '#ccc', fontSize: '14px', letterSpacing: '1px' }}>valitse kirjaimia</span>}
+          {state.currentInput || ''}
         </div>
       )}
 
