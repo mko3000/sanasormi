@@ -5,20 +5,76 @@ on:
     branches: [main]
 
 jobs:
-  deploy:
+  deploy-frontend:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+
+      - name: Set up Node.js
+        if: steps.changes.outputs.frontend == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend
+        if: steps.changes.outputs.frontend == 'true'
+        run: |
+          cd frontend
+          npm ci
+          npm run build
 
       - name: Connect to Tailscale
+        if: steps.changes.outputs.frontend == 'true'
         uses: tailscale/github-action@v2
         with:
           oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
           tags: tag:ci
 
-      - name: Deploy to kotipi
+      - name: Deploy frontend
+        if: steps.changes.outputs.frontend == 'true'
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan 100.74.124.45 >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_ed25519 kotipi@100.74.124.45 "sudo mkdir -p /var/www/html/sanasormi"
+          rsync -av --delete \
+            -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no" \
+            frontend/dist/ kotipi@100.74.124.45:/var/www/html/sanasormi/
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - 'docker-compose.yml'
+
+      - name: Connect to Tailscale
+        if: steps.changes.outputs.backend == 'true'
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
+          tags: tag:ci
+
+      - name: Deploy backend
+        if: steps.changes.outputs.backend == 'true'
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
@@ -27,5 +83,5 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 kotipi@100.74.124.45 "
             cd /home/kotipi/projects/sanasormi &&
             git pull &&
-            sudo docker compose up -d --build
+            sudo docker-compose up -d --build
           "
