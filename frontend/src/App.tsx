@@ -153,7 +153,7 @@ export function App() {
       {!state.gameOver && (
         <div style={{
           width: '100%',
-          minHeight: state.currentInput ? '44px' : '2px',
+          minHeight: '44px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
