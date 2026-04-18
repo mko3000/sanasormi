@@ -124,6 +124,7 @@ export function App() {
                             <li>Kutakin kirjainta voi käyttää vain kerran per sana</li>
                             <li>Vähintään 3 kirjainta</li>
                             <li>Vain perusmuodot hyväksytään</li>
+                            <li>Uudet kirjaimet joka päivä</li>
                         </ul>
                         <div style={{ marginTop: '8px', borderTop: '1px solid #eee', paddingTop: '8px' }}>
                             3p=1 · 4p=2 · 5p=4 · 6p=6 · 7p=9 · 8p=12 · 9p=18
