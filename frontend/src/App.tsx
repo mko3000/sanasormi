@@ -42,6 +42,18 @@ export function App() {
         return () => document.removeEventListener('mousedown', handler)
     }, [showRules])
 
+    useEffect(() => {
+        if (!confirmGiveUp) return
+        const handler = (e: MouseEvent) => {
+            const btn = document.getElementById('give-up-btn')
+            if (btn && !btn.contains(e.target as Node)) {
+                setConfirmGiveUp(false)
+            }
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [confirmGiveUp])
+
     if (loading || !state) {
         return <div style={{ textAlign: 'center', marginTop: '40px', fontFamily: 'monospace' }}>Ladataan...</div>
     }
@@ -123,6 +135,7 @@ export function App() {
             {/* Lopeta peli */}
             {!state.gameOver && (
                 <button
+                    id="give-up-btn"
                     onClick={handleGiveUp}
                     style={{
                         width: '100%',
