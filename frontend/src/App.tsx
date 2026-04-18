@@ -26,8 +26,13 @@ export function App() {
     const [confirmGiveUp, setConfirmGiveUp] = useState(false)
     const [showLeaderboardModal, setShowLeaderboardModal] = useState(false)
     const [username, setUsername] = useState('')
-    const [submitted, setSubmitted] = useState(false)
-    const [showLeaderboard, setShowLeaderboard] = useState(false)
+    const todayKey = state ? `sanasormi_submitted_${state.date}` : null
+    const [submitted, setSubmitted] = useState(() =>
+      todayKey ? localStorage.getItem(todayKey) === 'true' : false
+    )
+    const [showLeaderboard, setShowLeaderboard] = useState(() =>
+      todayKey ? localStorage.getItem(todayKey) === 'true' : false
+    )
     const [showRules, setShowRules] = useState(false)
     const rulesRef = useRef<HTMLDivElement>(null)
 
@@ -67,6 +72,7 @@ export function App() {
     const handleLeaderboardSubmit = async () => {
         if (!username.trim()) return
         await submitLeaderboard(username.trim())
+        if (todayKey) localStorage.setItem(todayKey, 'true')
         setSubmitted(true)
         setShowLeaderboardModal(false)
         setShowLeaderboard(true)

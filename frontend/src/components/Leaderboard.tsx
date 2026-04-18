@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 interface Entry {
   rank: number
@@ -10,18 +10,37 @@ interface Entry {
 
 export function Leaderboard() {
   const [entries, setEntries] = useState<Entry[]>([])
+  const [refreshing, setRefreshing] = useState(false)
 
-  useEffect(() => {
+  const fetchEntries = useCallback(() => {
+    setRefreshing(true)
     fetch('/api/leaderboard/today')
       .then((r) => r.json())
-      .then((d) => setEntries(d.entries))
+      .then((d) => { setEntries(d.entries); setRefreshing(false) })
   }, [])
+
+  useEffect(() => { fetchEntries() }, [fetchEntries])
 
   if (entries.length === 0) return null
 
   return (
-    <div style={{ width: '240px', margin: '0 auto', fontFamily: "'Courier New', monospace" }}>
-      <h3 style={{ fontSize: '14px', color: '#444', marginBottom: '8px' }}>Tulostaulukko</h3>
+    <div style={{ fontFamily: "'Courier New', monospace" }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+        <h3 style={{ fontSize: '14px', color: '#444', margin: 0 }}>Tulostaulukko</h3>
+        <button
+          onClick={fetchEntries}
+          title="Päivitä"
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: '14px', color: '#888', padding: '0 2px',
+            display: 'flex', alignItems: 'center',
+            transform: refreshing ? 'rotate(360deg)' : 'none',
+            transition: refreshing ? 'transform 0.5s linear' : 'none',
+          }}
+        >
+          ↻
+        </button>
+      </div>
       <table style={{ width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ color: '#888' }}>
