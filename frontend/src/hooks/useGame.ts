@@ -15,6 +15,39 @@ export type FeedbackMsg = { text: string; key: number; type: 'error' | 'success'
 
 const PRAISE: Record<number, string> = { 1: 'jep', 2: 'Se', 4: 'Hyvä!', 6: 'Kyllä se vaan', 9: 'Voi juma!', 12: 'EBIN', 18: 'Legendaarista!!!' }
 
+type SavedProgress = {
+  date: string
+  foundWords: string[]
+  score: number
+  timeElapsed: number
+  gameOver: boolean
+  solutions: string[] | null
+}
+
+function loadProgress(date: string): Partial<SavedProgress> {
+  try {
+    const raw = localStorage.getItem(`sanasormi_${date}`)
+    if (!raw) return {}
+    const saved: SavedProgress = JSON.parse(raw)
+    if (saved.date !== date) return {}
+    return saved
+  } catch {
+    return {}
+  }
+}
+
+function saveProgress(state: GameState) {
+  const saved: SavedProgress = {
+    date: state.date,
+    foundWords: state.foundWords,
+    score: state.score,
+    timeElapsed: state.timeElapsed,
+    gameOver: state.gameOver,
+    solutions: state.solutions,
+  }
+  localStorage.setItem(`sanasormi_${state.date}`, JSON.stringify(saved))
+}
+
 export function useGame() {
   const [state, setState] = useState<GameState | null>(null)
   const [feedback, setFeedback] = useState<FeedbackMsg | null>(null)
@@ -26,6 +59,7 @@ export function useGame() {
     fetch('/api/puzzle/today')
       .then((r) => r.json())
       .then((data: PuzzleResponse) => {
+        const saved = loadProgress(data.date)
         setState({
           ...INITIAL_STATE,
           date: data.date,
@@ -34,10 +68,20 @@ export function useGame() {
           centerIndex: data.center_index,
           solutionCount: data.solution_count,
           maxScore: data.max_score,
+          foundWords: saved.foundWords ?? [],
+          score: saved.score ?? 0,
+          timeElapsed: saved.timeElapsed ?? 0,
+          gameOver: saved.gameOver ?? false,
+          solutions: saved.solutions ?? null,
         })
         setLoading(false)
       })
   }, [])
+
+  // Persist state changes to localStorage
+  useEffect(() => {
+    if (state) saveProgress(state)
+  }, [state?.foundWords, state?.score, state?.timeElapsed, state?.gameOver, state?.solutions])
 
   // Timer
   useEffect(() => {
