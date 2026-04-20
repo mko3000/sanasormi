@@ -34,6 +34,15 @@ export function App() {
       todayKey ? localStorage.getItem(todayKey) === 'true' : false
     )
     const [showRules, setShowRules] = useState(false)
+
+    useEffect(() => {
+      if (!todayKey) return
+      const hasSubmitted = localStorage.getItem(todayKey) === 'true'
+      if (hasSubmitted) {
+        setSubmitted(true)
+        setShowLeaderboard(true)
+      }
+    }, [todayKey])
     const rulesRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
