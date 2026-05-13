@@ -38,17 +38,17 @@ app.add_middleware(
 def _get_or_create_today() -> dict:
     date = today_str()
     row = get_puzzle(date)
-    if row:
-        return {
-            "date": row.date,
-            "letters": json.loads(row.letters),
-            "center": row.center,
-            "solutions": json.loads(row.solutions),
-            "max_score": row.max_score,
-        }
-    data = generate_puzzle(wordlist)
-    save_puzzle(date, data["letters"], data["center"], data["solutions"], data["max_score"])
-    return {"date": date, **data}
+    if not row:
+        data = generate_puzzle(wordlist)
+        save_puzzle(date, data["letters"], data["center"], data["solutions"], data["max_score"])
+        row = get_puzzle(date)
+    return {
+        "date": row.date,
+        "letters": json.loads(row.letters),
+        "center": row.center,
+        "solutions": json.loads(row.solutions),
+        "max_score": row.max_score,
+    }
 
 
 @app.get("/api/puzzle/today")

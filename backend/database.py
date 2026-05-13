@@ -54,18 +54,19 @@ def get_puzzle(date: str) -> DailyPuzzle | None:
         return session.get(DailyPuzzle, date)
 
 
-def save_puzzle(date: str, letters: list[str], center: str, solutions: list[str], max_score: int) -> DailyPuzzle:
-    puzzle = DailyPuzzle(
-        date=date,
-        letters=json.dumps(letters),
-        center=center,
-        solutions=json.dumps(solutions),
-        max_score=max_score,
-    )
-    with Session(engine) as session:
-        session.merge(puzzle)
-        session.commit()
-    return puzzle
+def save_puzzle(date: str, letters: list[str], center: str, solutions: list[str], max_score: int) -> None:
+    with engine.connect() as conn:
+        conn.execute(text(
+            "INSERT OR IGNORE INTO daily_puzzle (date, letters, center, solutions, max_score) "
+            "VALUES (:date, :letters, :center, :solutions, :max_score)"
+        ), {
+            "date": date,
+            "letters": json.dumps(letters),
+            "center": center,
+            "solutions": json.dumps(solutions),
+            "max_score": max_score,
+        })
+        conn.commit()
 
 
 def get_leaderboard(date: str) -> list[LeaderboardEntry]:
