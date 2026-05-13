@@ -24,6 +24,16 @@ type SavedProgress = {
   solutions: string[] | null
 }
 
+function getOrCreatePlayerId(): string {
+  const key = 'sanasormi_player_id'
+  let id = localStorage.getItem(key)
+  if (!id) {
+    id = crypto.randomUUID()
+    localStorage.setItem(key, id)
+  }
+  return id
+}
+
 function loadProgress(date: string): Partial<SavedProgress> {
   try {
     const raw = localStorage.getItem(`sanasormi_${date}`)
@@ -59,6 +69,11 @@ export function useGame() {
     fetch('/api/puzzle/today')
       .then((r) => r.json())
       .then((data: PuzzleResponse) => {
+        fetch('/api/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date: data.date, player_id: getOrCreatePlayerId() }),
+        })
         const saved = loadProgress(data.date)
         setState({
           ...INITIAL_STATE,

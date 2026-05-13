@@ -29,8 +29,20 @@ class LeaderboardEntry(Base):
     submitted_at = Column(String, nullable=False)
 
 
+class PlayerStart(Base):
+    __tablename__ = "player_start"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(String, nullable=False)
+    player_id = Column(String, nullable=False)
+
+
 def init_db():
     Base.metadata.create_all(engine)
+    with engine.connect() as conn:
+        conn.execute(text(
+            "CREATE UNIQUE INDEX IF NOT EXISTS uq_player_start ON player_start (date, player_id)"
+        ))
+        conn.commit()
 
 
 def today_str() -> str:
@@ -61,6 +73,19 @@ def get_leaderboard(date: str) -> list[LeaderboardEntry]:
         return session.query(LeaderboardEntry).filter_by(date=date).order_by(
             LeaderboardEntry.score.desc()
         ).all()
+
+
+def record_player_start(date: str, player_id: str) -> None:
+    with engine.connect() as conn:
+        conn.execute(text(
+            "INSERT OR IGNORE INTO player_start (date, player_id) VALUES (:date, :pid)"
+        ), {"date": date, "pid": player_id})
+        conn.commit()
+
+
+def get_player_count(date: str) -> int:
+    with Session(engine) as session:
+        return session.query(PlayerStart).filter_by(date=date).count()
 
 
 def save_leaderboard_entry(date: str, username: str, score: int, word_count: int, found_words: list[str]) -> None:

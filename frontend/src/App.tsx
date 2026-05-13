@@ -34,6 +34,7 @@ export function App() {
       todayKey ? localStorage.getItem(todayKey) === 'true' : false
     )
     const [showRules, setShowRules] = useState(false)
+    const [playerCount, setPlayerCount] = useState<number | null>(null)
 
     useEffect(() => {
       if (!todayKey) return
@@ -47,6 +48,9 @@ export function App() {
 
     useEffect(() => {
         if (!showRules) return
+        fetch('/api/stats/today')
+            .then((r) => r.json())
+            .then((d) => setPlayerCount(d.player_count))
         const handler = (e: MouseEvent) => {
             if (rulesRef.current && !rulesRef.current.contains(e.target as Node)) {
                 setShowRules(false)
@@ -135,14 +139,18 @@ export function App() {
                         <strong>Säännöt</strong>
                         <ul style={{ margin: '8px 0 0', paddingLeft: '16px' }}>
                             <li>Muodosta sanoja ruudukon kirjaimista</li>
-                            <li>Jokainen sana pitää sisältää <strong>keskimmäisen kirjaimen</strong></li>
+                            <li>Jokaisen sanan pitää sisältää <strong>keskimmäinen kirjain</strong></li>
                             <li>Kutakin kirjainta voi käyttää vain kerran per sana</li>
                             <li>Vähintään 3 kirjainta</li>
                             <li>Vain perusmuodot hyväksytään</li>
                             <li>Uudet kirjaimet joka päivä</li>
                         </ul>
                         <div style={{ marginTop: '8px', borderTop: '1px solid #eee', paddingTop: '8px' }}>
-                            3p=1 · 4p=2 · 5p=4 · 6p=6 · 7p=9 · 8p=12 · 9p=18
+                            <div><strong>Pisteet sanan pituudesta</strong></div>
+                            <div>3=1p · 4=2p · 5=4p · 6=6p · 7=9p · 8=12p · 9=18p</div>
+                        </div>
+                        <div style={{ marginTop: '8px', borderTop: '1px solid #eee', paddingTop: '8px' }}>
+                            pelaajia tänään: {playerCount ?? '…'}
                         </div>
                     </div>
                 )}
@@ -224,7 +232,7 @@ export function App() {
                     onClick={() => setShowLeaderboardModal(true)}
                     style={{ ...btnBlack, width: '100%' }}
                 >
-                    Lähetä tulokset
+                    Lisää tulostaulukkoon
                 </button>
             )}
 

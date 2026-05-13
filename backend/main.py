@@ -10,6 +10,7 @@ from puzzle import load_words, find_solutions, generate_puzzle, word_score, SCOR
 from database import (
     init_db, today_str, get_puzzle, save_puzzle,
     get_leaderboard, save_leaderboard_entry,
+    record_player_start, get_player_count,
 )
 
 wordlist: set[str] = set()
@@ -106,6 +107,23 @@ class LeaderboardSubmit(BaseModel):
 def submit_leaderboard(req: LeaderboardSubmit):
     save_leaderboard_entry(req.date, req.username, req.score, req.word_count, req.found_words)
     return {"ok": True}
+
+
+class StartRequest(BaseModel):
+    date: str
+    player_id: str
+
+
+@app.post("/api/start")
+def record_start(req: StartRequest):
+    record_player_start(req.date, req.player_id)
+    return {"ok": True}
+
+
+@app.get("/api/stats/today")
+def get_today_stats():
+    date = today_str()
+    return {"date": date, "player_count": get_player_count(date)}
 
 
 @app.get("/api/leaderboard/today")
