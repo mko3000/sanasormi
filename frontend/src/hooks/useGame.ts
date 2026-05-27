@@ -64,6 +64,7 @@ export function useGame() {
   const [loading, setLoading] = useState(true)
   const errorKeyRef = useRef(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const submittingRef = useRef(false)
 
   useEffect(() => {
     fetch('/api/puzzle/today')
@@ -154,7 +155,7 @@ export function useGame() {
   }, [])
 
   const submitWord = useCallback(async () => {
-    if (!state) return
+    if (!state || submittingRef.current) return
     const word = state.currentInput.trim().toLowerCase()
     if (word.length < 3) return
 
@@ -164,33 +165,38 @@ export function useGame() {
       return
     }
 
-    const res = await fetch('/api/validate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ word, date: state.date }),
-    })
-    const data: ValidateResponse = await res.json()
-
-    if (data.valid && data.points !== undefined) {
-      const praise = PRAISE[data.points] ?? 'Hyvä!'
-      showFeedback(`${praise} +${data.points}p`, 'success')
-      setState((s) => {
-        if (!s) return s
-        return {
-          ...s,
-          foundWords: [...s.foundWords, word].sort(),
-          score: s.score + data.points!,
-          currentInput: '',
-          selectedIndices: [],
-        }
+    submittingRef.current = true
+    try {
+      const res = await fetch('/api/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ word, date: state.date }),
       })
-    } else {
-      if (data.reason === 'no_center') {
-        showFeedback('Käytä keskellä olevaa kirjainta', 'error')
+      const data: ValidateResponse = await res.json()
+
+      if (data.valid && data.points !== undefined) {
+        const praise = PRAISE[data.points] ?? 'Hyvä!'
+        showFeedback(`${praise} +${data.points}p`, 'success')
+        setState((s) => {
+          if (!s || s.foundWords.includes(word)) return s
+          return {
+            ...s,
+            foundWords: [...s.foundWords, word].sort(),
+            score: s.score + data.points!,
+            currentInput: '',
+            selectedIndices: [],
+          }
+        })
       } else {
-        showFeedback('Ei kelpaa', 'error')
+        if (data.reason === 'no_center') {
+          showFeedback('Käytä keskellä olevaa kirjainta', 'error')
+        } else {
+          showFeedback('Ei kelpaa', 'error')
+        }
+        clearInput()
       }
-      clearInput()
+    } finally {
+      submittingRef.current = false
     }
   }, [state, showFeedback, clearInput])
 
