@@ -1,9 +1,10 @@
 import json
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from sqlalchemy import create_engine, Column, Integer, String, text
 from sqlalchemy.orm import declarative_base, Session
 
-HELSINKI_TZ = timezone(timedelta(hours=2))  # Europe/Helsinki (UTC+2, simplified)
+HELSINKI_TZ = ZoneInfo("Europe/Helsinki")  # correctly follows DST (EET/EEST)
 
 engine = create_engine("sqlite:///data/sanajahti.db", connect_args={"check_same_thread": False})
 Base = declarative_base()

@@ -1,8 +1,9 @@
 import json
+import threading
 from contextlib import asynccontextmanager
 from collections import Counter
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -35,13 +36,20 @@ app.add_middleware(
 )
 
 
+_generate_lock = threading.Lock()
+
+
 def _get_or_create_today() -> dict:
     date = today_str()
     row = get_puzzle(date)
     if not row:
-        data = generate_puzzle(wordlist)
-        save_puzzle(date, data["letters"], data["center"], data["solutions"], data["max_score"])
-        row = get_puzzle(date)
+        with _generate_lock:
+            # Another thread may have generated it while we waited for the lock.
+            row = get_puzzle(date)
+            if not row:
+                data = generate_puzzle(wordlist)
+                save_puzzle(date, data["letters"], data["center"], data["solutions"], data["max_score"])
+                row = get_puzzle(date)
     return {
         "date": row.date,
         "letters": json.loads(row.letters),
@@ -52,7 +60,8 @@ def _get_or_create_today() -> dict:
 
 
 @app.get("/api/puzzle/today")
-def get_today_puzzle():
+def get_today_puzzle(response: Response):
+    response.headers["Cache-Control"] = "no-store"
     data = _get_or_create_today()
     return {
         "date": data["date"],
@@ -70,7 +79,8 @@ class ValidateRequest(BaseModel):
 
 
 @app.post("/api/validate")
-def validate_word(req: ValidateRequest):
+def validate_word(req: ValidateRequest, response: Response):
+    response.headers["Cache-Control"] = "no-store"
     row = get_puzzle(req.date)
     if not row:
         raise HTTPException(status_code=404, detail="Puzzle not found")
@@ -90,7 +100,8 @@ def validate_word(req: ValidateRequest):
 
 
 @app.get("/api/solutions/today")
-def get_solutions():
+def get_solutions(response: Response):
+    response.headers["Cache-Control"] = "no-store"
     data = _get_or_create_today()
     return {"words": data["solutions"]}
 
